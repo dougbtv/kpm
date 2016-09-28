@@ -4,7 +4,7 @@ import etcd
 import re
 import kpm.semver as semver
 from kpm.models.package_base import PackageBase
-from kpm.exception import PackageAlreadyExists, ChannelNotFound
+from kpm.exception import PackageAlreadyExists
 from kpm.models.etcd import ETCD_PREFIX, etcd_client
 
 
@@ -128,16 +128,6 @@ class Package(PackageBase):
     def search(self, query):
         r = '\n'.join(self.search_index())
         return re.findall(r"(.*%s.*)" % query, r)
-
-    @classmethod
-    def _delete_from_channels(self, package, version, channel_class):
-        p = self(package, version)
-        for channel in p.channels(channel_class):
-            c = channel_class(channel, package)
-            try:
-                c.remove_release(version)
-            except ChannelNotFound:
-                pass
 
     @classmethod
     def _delete(self, package, version):

@@ -77,8 +77,8 @@ def test_getversions_empty(monkeypatch):
     assert Package.all_versions("ant31/rocketchat") == []
 
 
-def test_getversion_latest(getversions):
-    assert str(Package.get_version("ant31/rocketchat", "latest")) == "1.8.2-rc2"
+def test_getversion_default(getversions):
+    assert str(Package.get_version("ant31/rocketchat", "default")) == "1.8.2-rc2"
 
 
 def test_getversion_stable_none(getversions):

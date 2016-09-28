@@ -5,6 +5,7 @@ from kpm.manifest_jsonnet import ManifestJsonnet
 from kpm.semver import last_version, select_version
 from kpm.exception import (InvalidVersion,
                            PackageAlreadyExists,
+                           ChannelNotFound,
                            PackageVersionNotFound,
                            PackageNotFound)
 
@@ -74,7 +75,7 @@ class PackageBase(object):
         return None
 
     @classmethod
-    def get(self, package, version='latest'):
+    def get(self, package, version='default'):
         """
         package: string following "organization/package_name" format
         version: version query. If None return latest version
@@ -90,7 +91,7 @@ class PackageBase(object):
         versions = self.all_versions(package)
         if not versions:
             self._raise_not_found(package)
-        if version_query is None or version_query == 'latest':
+        if version_query is None or version_query == 'default':
             return last_version(versions, stable)
         else:
             try:
@@ -116,19 +117,19 @@ class PackageBase(object):
 
     @classmethod
     def search_index(self):
-        raise NotImplementedError
+        pass
 
     @classmethod
     def add_index(self, name):
-        raise NotImplementedError
+        pass
 
     @classmethod
     def remove_index(self, name):
-        raise NotImplementedError
+        pass
 
     @classmethod
     def write_index(self, index):
-        raise NotImplementedError
+        pass
 
     @classmethod
     def reindex(self):
@@ -170,7 +171,13 @@ class PackageBase(object):
 
     @classmethod
     def _delete_from_channels(self, package, version, channel_class):
-        raise NotImplementedError
+        p = self(package, version)
+        for channel in p.channels(channel_class):
+            c = channel_class(channel, package)
+            try:
+                c.remove_release(version)
+            except ChannelNotFound:
+                pass
 
     @classmethod
     def delete(self, package, version, channel_class):

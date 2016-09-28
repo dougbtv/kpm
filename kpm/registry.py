@@ -89,7 +89,7 @@ class Registry(object):
         body['name'] = pname
         body['organization'] = organization
         body['package'] = name
-        path = "/packages/%s/%s" % (organization, pname)
+        path = "/packages"
         r = requests.post(self._url(path),
                           params={"force": str(force).lower()},
                           data=json.dumps(body), headers=self.headers)

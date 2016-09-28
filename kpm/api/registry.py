@@ -48,7 +48,7 @@ def pull(package):
     current_app.logger.info("pull %s", package)
     current_app.logger.info("headers %s", request.headers)
     values = getvalues()
-    version = values.get("version", 'latest')
+    version = values.get("version", 'default')
     r = kpm.api.impl.registry.pull(package, version)
     if 'format' in values and values['format'] == 'json':
         resp = jsonify({"package": r['package'], "kub": r['blob']})
@@ -101,11 +101,8 @@ def search_reindex():
 @registry_app.route("/api/v1/packages/<path:package>", methods=['GET'], strict_slashes=False)
 def show_package(package):
     values = getvalues()
-    version = values.get("version", 'latest')
-    pullmode = False
-    if 'pull' in values and (values['pull'] == 'true' or values['pull']):
-        pullmode = True
-    r = kpm.api.impl.registry.show_package(package, version, pullmode)
+    version = values.get("version", 'default')
+    r = kpm.api.impl.registry.show_package(package, version)
     return jsonify(r)
 
 
@@ -156,6 +153,6 @@ def delete_channel(package, name):
 def delete_package(orga, pname):
     package = "%s/%s" % (orga, pname)
     values = getvalues()
-    version = values.get("version", "latest")
+    version = values.get("version", "default")
     r = kpm.api.impl.registry.delete_package(package, version)
     return jsonify(r)

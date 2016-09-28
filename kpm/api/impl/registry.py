@@ -7,7 +7,7 @@ from kpm.models.etcd.channel import Channel
 logger = logging.getLogger(__name__)
 
 
-def _get_package(package, version_query='latest', package_class=Package):
+def _get_package(package, version_query='default', package_class=Package):
     """
       Fetch the package data from the datastore
       and instantiate a :obj:`kpm.models.package_base.PackageModelBase`
@@ -30,12 +30,12 @@ def _get_package(package, version_query='latest', package_class=Package):
       :obj:`kpm.exception.PackageVersionNotFound`: version-query didn't match any release
 
     """
-    # if version is None; Find latest version
+    # if version is None; Find default version
     p = package_class.get(package, version_query)
     return p
 
 
-def pull(package, version='latest', package_class=Package):
+def pull(package, version='default', package_class=Package):
     """
     Retrives the package blob from the datastore
 
@@ -189,8 +189,7 @@ def list_packages(organization=None, package_class=Package):
 
 
 def show_package(package,
-                 version="latest",
-                 pullmode=False,
+                 version="default",
                  channel_class=Channel,
                  package_class=Package):
     """
@@ -199,7 +198,6 @@ def show_package(package,
     Args:
       package (:obj:`str`): package name in the format "namespace/name" or "domain.com/name"
       version (:obj:`str`): the 'exact' package version (this is not a version_query)
-      pullmode (:obj:`boolean`): include the package blob in the response
       channel_class (:obj:`kpm.models.channel_base:ChannelBase`): the implemented Channel class to use
       package_class (:obj:`kpm.models.package_base:PackageBase`): the implemented Package class to use
 
@@ -264,8 +262,6 @@ def show_package(package,
                 "channels": packagemodel.channels(channel_class),
                 "available_releases": [str(x) for x in sorted(semver.versions(packagemodel.versions(), stable),
                                                               reverse=True)]}
-    if pullmode:
-        response['kub'] = packagemodel.blob
     return response
 
 
@@ -399,7 +395,7 @@ def delete_channel(package, name, channel_class=Channel):
     return {"channel": channel.name, "package": package, "action": 'delete'}
 
 
-def delete_package(package, version="latest", package_class=Package, channel_class=Channel):
+def delete_package(package, version="default", package_class=Package, channel_class=Channel):
     packagemodel = _get_package(package, version, package_class)
     package_class.delete(packagemodel.package, packagemodel.version, channel_class)
     return {"status": "delete", "package": packagemodel.package, "version": packagemodel.version}
